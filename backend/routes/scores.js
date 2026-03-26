@@ -150,19 +150,30 @@ router.get('/leaderboard', async (_req, res) => {
     if (error) {
       const { data: fallback } = await supabase
         .from('scores')
-        .select('user_id, stableford_points, users(full_name, handicap)')
+        .select('user_id, stableford_points, users(full_name, handicap, subscription_tier, subscription_status)')
         .order('stableford_points', { ascending: false })
         .limit(20)
 
-      return res.json((fallback || []).map((row, index) => ({
-        user_id: row.user_id,
-        full_name: row.users?.full_name || 'Member',
-        avg_score: Number(row.stableford_points || 0),
-        total_rounds: 1,
-        handicap: row.users?.handicap ?? null,
-        total_donated: 0,
-        rank: index + 1,
-      })))
+      return res.json((fallback || []).map((row, index) => {
+        // Fallback smart calculator
+        let baseDonation = 0;
+        const user = row.users || {};
+        if (user.subscription_status === 'active') {
+          if (user.subscription_tier === 'birdie') baseDonation = 1.00;
+          if (user.subscription_tier === 'eagle') baseDonation = 3.75;
+          if (user.subscription_tier === 'albatross') baseDonation = 10.00;
+        }
+
+        return {
+          user_id: row.user_id,
+          full_name: user.full_name || 'Member',
+          avg_score: Number(row.stableford_points || 0),
+          total_rounds: 1,
+          handicap: user.handicap ?? null,
+          total_donated: baseDonation,
+          rank: index + 1,
+        }
+      }))
     }
 
     const userIds = (leaderboard || []).map((row) => row.user_id).filter(Boolean)
@@ -170,15 +181,17 @@ router.get('/leaderboard', async (_req, res) => {
       return res.json([])
     }
 
+    // UPDATED: Now we also ask Supabase for their subscription tier and status!
     const [{ data: users, error: usersError }, { data: donations, error: donationsError }] = await Promise.all([
-      supabase.from('users').select('id, handicap').in('id', userIds),
+      supabase.from('users').select('id, handicap, subscription_tier, subscription_status').in('id', userIds),
       supabase.from('impact_log').select('user_id, amount').in('user_id', userIds),
     ])
 
     if (usersError) throw usersError
     if (donationsError) throw donationsError
 
-    const handicapMap = new Map((users || []).map((user) => [user.id, user.handicap]))
+    // UPDATED: Map the whole user object instead of just the handicap
+    const userMap = new Map((users || []).map((user) => [user.id, user]))
     const donationMap = new Map()
 
     for (const row of donations || []) {
@@ -186,12 +199,24 @@ router.get('/leaderboard', async (_req, res) => {
     }
 
     res.json(
-      (leaderboard || []).map((row, index) => ({
-        ...row,
-        handicap: handicapMap.get(row.user_id) ?? null,
-        total_donated: donationMap.get(row.user_id) || 0,
-        rank: index + 1,
-      }))
+      (leaderboard || []).map((row, index) => {
+        const user = userMap.get(row.user_id) || {};
+        let dbDonation = donationMap.get(row.user_id) || 0;
+
+        // SMART DONATION CALCULATOR: Instantly calculates baseline impact if DB is empty
+        if (dbDonation === 0 && user.subscription_status === 'active') {
+          if (user.subscription_tier === 'birdie') dbDonation = 1.00;
+          if (user.subscription_tier === 'eagle') dbDonation = 3.75;
+          if (user.subscription_tier === 'albatross') dbDonation = 10.00;
+        }
+
+        return {
+          ...row,
+          handicap: user.handicap ?? null,
+          total_donated: dbDonation,
+          rank: index + 1,
+        };
+      })
     )
   } catch (err) {
     res.status(500).json({ error: err.message })
