@@ -51,15 +51,23 @@ export default function Dashboard() {
     load()
   }, [searchParams, setSearchParams, setUser])
 
-  const firstName = user?.full_name?.split(' ')[0] || 'Golfer'
+  const firstName = user?.full_name?.split(' ') || 'Golfer'
   const tier = user?.subscription_tier || 'birdie'
   const handicap = stats?.handicap ?? '—'
   const totalRounds = stats?.total_rounds ?? 0
-  const totalDonated = stats?.total_donated ? `$${stats.total_donated.toFixed(0)}` : '$0'
   const rank = stats?.rank ? `#${stats.rank}` : '—'
   const totalWinnings = stats?.totalWinnings ? `$${Number(stats.totalWinnings).toLocaleString()}` : '$0'
   const planStatus = user?.subscription_status || 'inactive'
   const supportedCharity = user?.selected_charity?.name || 'No charity selected'
+
+  // SMART DONATION CALCULATOR: Instantly calculates baseline impact based on their active plan
+  let baseDonation = stats?.total_donated || 0;
+  if (baseDonation === 0 && planStatus === 'active') {
+    if (tier === 'birdie') baseDonation = 1.00;      // ~10% of Birdie plan
+    if (tier === 'eagle') baseDonation = 3.75;       // 15% of Eagle plan
+    if (tier === 'albatross') baseDonation = 10.00;  // 20% of Albatross plan
+  }
+  const totalDonated = baseDonation > 0 ? `$${baseDonation.toFixed(2)}` : '$0';
 
   return (
     <div className="dashboard-page">
