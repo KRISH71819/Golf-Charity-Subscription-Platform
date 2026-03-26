@@ -1,0 +1,116 @@
+/* Profile Page */
+
+.profile-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Avatar row */
+.profile-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-forest), var(--color-forest-dark));
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-xl);
+  flex-shrink: 0;
+}
+
+/* Details */
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-cream);
+}
+
+.detail-label {
+  font-size: var(--text-sm);
+  color: var(--color-slate);
+}
+
+.detail-value {
+  font-weight: 600;
+}
+
+/* Profile edit fields */
+.profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Settings list */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-cream-dark);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--duration-fast);
+  width: 100%;
+}
+
+.settings-item:hover {
+  border-color: var(--color-copper);
+  background: var(--color-cream);
+}
+
+.settings-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.settings-item div {
+  flex: 1;
+}
+
+.settings-item strong {
+  display: block;
+  font-size: var(--text-sm);
+}
+
+.settings-item span:not(.settings-icon):not(.settings-arrow) {
+  font-size: var(--text-xs);
+  color: var(--color-slate);
+}
+
+.settings-arrow {
+  font-size: var(--text-lg);
+  color: var(--color-slate);
+}
+
+@media (max-width: 768px) {
+  .profile-avatar-row {
+    flex-wrap: wrap;
+  }
+}

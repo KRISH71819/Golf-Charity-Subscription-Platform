@@ -1,0 +1,219 @@
+/* Signup Page */
+
+.signup-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* Sidebar */
+.signup-sidebar {
+  position: sticky;
+  top: 100px;
+}
+
+.signup-sidebar h2 {
+  font-size: var(--text-2xl);
+}
+
+.step-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: var(--space-8) 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-slate);
+  font-size: var(--text-sm);
+}
+
+.step-item.active {
+  color: var(--color-forest-dark);
+  font-weight: 600;
+}
+
+.step-item.done {
+  color: var(--color-copper-dark);
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+}
+
+.step-item.active .step-circle {
+  border-color: var(--color-forest);
+  background: var(--color-forest);
+  color: var(--color-cream);
+}
+
+.step-item.done .step-circle {
+  border-color: var(--color-copper);
+  background: var(--color-copper);
+  color: var(--color-white);
+}
+
+.signup-benefits {
+  background: var(--color-cream);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.signup-benefits h4 {
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-3);
+}
+
+.signup-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+/* Form panel */
+.signup-form-panel {
+  min-height: 400px;
+}
+
+.step-panel h3 {
+  margin-bottom: var(--space-4);
+}
+
+/* Plan picker */
+.plan-picker {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.plan-option {
+  flex: 1;
+  padding: var(--space-5) var(--space-4);
+  border: 2px solid var(--color-cream-dark);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.plan-option:hover {
+  border-color: var(--color-copper);
+}
+
+.plan-option.selected {
+  border-color: var(--color-forest);
+  background: rgba(45, 90, 39, 0.04);
+}
+
+.plan-option-icon {
+  font-size: 1.5rem;
+}
+
+.plan-option-price {
+  font-size: var(--text-sm);
+  color: var(--color-slate);
+}
+
+/* Charity picker */
+.charity-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.charity-chip {
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid var(--color-cream-dark);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.charity-chip:hover {
+  border-color: var(--color-copper);
+}
+
+.charity-chip.selected {
+  border-color: var(--color-forest);
+  background: rgba(45, 90, 39, 0.08);
+  color: var(--color-forest-dark);
+  font-weight: 600;
+}
+
+/* Form fields */
+.signup-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-forest-dark);
+}
+
+.form-input {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-cream-dark);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-family: var(--font-body);
+  transition: border-color var(--duration-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-forest);
+  box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.12);
+}
+
+/* Step actions */
+.step-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.step-actions .btn {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .signup-container {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-sidebar {
+    position: static;
+  }
+
+  .plan-picker {
+    flex-direction: column;
+  }
+}

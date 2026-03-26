@@ -1,0 +1,152 @@
+/* How It Works Page */
+
+.page-header {
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-8);
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-copper), var(--color-forest), var(--color-copper));
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  position: relative;
+  width: 50%;
+  padding: var(--space-4);
+}
+
+.timeline-item.left {
+  padding-right: var(--space-12);
+  text-align: right;
+}
+
+.timeline-item.right {
+  margin-left: 50%;
+  padding-left: var(--space-12);
+  text-align: left;
+}
+
+.timeline-dot {
+  position: absolute;
+  top: var(--space-6);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--color-forest);
+  color: var(--color-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  z-index: 10;
+  box-shadow: 0 0 0 6px var(--color-cream);
+}
+
+.timeline-item.left .timeline-dot {
+  right: -24px;
+}
+
+.timeline-item.right .timeline-dot {
+  left: -24px;
+}
+
+.timeline-card {
+  text-align: left;
+}
+
+.step-icon-lg {
+  font-size: var(--text-3xl);
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.timeline-card h3 {
+  margin-bottom: var(--space-2);
+}
+
+.timeline-detail {
+  font-style: italic;
+  color: var(--color-copper-dark);
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+}
+
+/* FAQ */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.faq-item {
+  cursor: pointer;
+}
+
+.faq-item summary {
+  font-weight: 600;
+  font-size: var(--text-base);
+  padding: var(--space-2) 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.faq-item summary::after {
+  content: '+';
+  font-size: var(--text-xl);
+  color: var(--color-copper);
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.faq-item[open] summary::after {
+  content: '−';
+}
+
+.faq-item p {
+  padding-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-slate);
+  line-height: 1.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timeline::before {
+    left: 24px;
+  }
+
+  .timeline-item,
+  .timeline-item.left,
+  .timeline-item.right {
+    width: 100%;
+    padding-left: var(--space-16);
+    padding-right: 0;
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .timeline-item.left .timeline-dot,
+  .timeline-item.right .timeline-dot {
+    left: 0;
+    right: auto;
+  }
+}

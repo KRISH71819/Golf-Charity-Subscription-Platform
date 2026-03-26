@@ -1,0 +1,149 @@
+/* Charity Profile Page */
+
+.charity-hero {
+  padding: calc(var(--nav-height) + var(--space-12)) 0 var(--space-12);
+}
+
+.back-link {
+  font-size: var(--text-sm);
+  color: var(--color-forest);
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: var(--space-6);
+}
+
+.charity-hero-content {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+
+.charity-hero-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.charity-hero-mission {
+  max-width: 600px;
+  margin-top: var(--space-3);
+  color: var(--color-slate);
+}
+
+.charity-profile-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-8);
+}
+
+.charity-stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.charity-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-cream-dark);
+}
+
+.charity-stat-label {
+  font-size: var(--text-sm);
+  color: var(--color-slate);
+}
+
+.charity-stat-value {
+  font-weight: 700;
+  color: var(--color-forest-dark);
+}
+
+/* Donation Chart */
+.donation-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  height: 200px;
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+}
+
+.donation-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.donation-bar {
+  width: 100%;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  min-height: 20px;
+  transition: height var(--duration-slow) var(--ease-out);
+}
+
+.donation-month {
+  font-size: var(--text-xs);
+  color: var(--color-slate);
+  font-weight: 500;
+}
+
+.donation-amount {
+  font-size: var(--text-xs);
+  color: var(--color-forest-dark);
+  font-weight: 700;
+}
+
+/* Supporters */
+.supporters-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.supporter-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.supporter-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;   
+  height: 40px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: bold;
+  overflow: hidden;
+  color: #333;
+}
+
+.supporter-rounds {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-slate);
+}
+
+@media (max-width: 768px) {
+  .charity-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .charity-hero-content {
+    flex-direction: column;
+  }
+}
