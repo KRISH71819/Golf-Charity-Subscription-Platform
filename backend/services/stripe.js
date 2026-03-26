@@ -16,10 +16,12 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 /**
  * Create a Stripe Checkout Session for subscription
  */
-export async function createCheckoutSession({ email, priceId, userId, charityId }) {
+export async function createCheckoutSession({ email, priceId, userId, charityId, tierId, billingCycle }) {
   // Ensure we have a string for metadata to prevent Stripe validation errors
   const safeUserId = String(userId || '');
   const safeCharityId = String(charityId || '');
+  const safeTierId = String(tierId || '');
+  const safeBillingCycle = String(billingCycle || 'monthly');
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
@@ -29,7 +31,9 @@ export async function createCheckoutSession({ email, priceId, userId, charityId 
     cancel_url: `${FRONTEND_URL}/pricing`,
     metadata: { 
       userId: safeUserId, 
-      charityId: safeCharityId 
+      charityId: safeCharityId,
+      tierId: safeTierId,
+      billingCycle: safeBillingCycle,
     },
   })
   return session
@@ -62,6 +66,10 @@ export function constructWebhookEvent(rawBody, sig) {
  */
 export async function getSubscription(subscriptionId) {
   return stripe.subscriptions.retrieve(subscriptionId)
+}
+
+export async function getCheckoutSession(sessionId) {
+  return stripe.checkout.sessions.retrieve(sessionId)
 }
 
 export default stripe

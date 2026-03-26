@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import supabase from '../services/supabase.js'
 import { authenticate } from '../middleware/auth.js'
+import { refreshUserHandicap } from '../services/handicap.js'
 
 const router = Router()
 const MAX_SCORES = 5
@@ -42,27 +43,41 @@ router.get('/my-scores', authenticate, async (req, res) => {
 // GET /api/scores/stats — Calculate REAL stats from database
 router.get('/stats', authenticate, async (req, res) => {
   try {
-    // Fetch all scores for this user to calculate real stats
-    const { data, error } = await supabase
-      .from('scores')
-      .select('stableford_points')
-      .eq('user_id', req.user.id);
+    const userId = req.user.id
+    const [
+      { data: userProfile, error: userError },
+      { data: scores, error: scoresError },
+      { data: donations, error: donationsError },
+      { data: leaderboard, error: leaderboardError },
+    ] = await Promise.all([
+      supabase.from('users').select('handicap').eq('id', userId).single(),
+      supabase.from('scores').select('stableford_points').eq('user_id', userId),
+      supabase.from('impact_log').select('amount').eq('user_id', userId),
+      supabase.rpc('get_leaderboard', { limit_count: 100 }),
+    ])
 
-    if (error) throw error;
+    for (const error of [userError, scoresError, donationsError, leaderboardError]) {
+      if (error) throw error
+    }
 
-    const roundsPlayed = data ? data.length : 0;
-    
-    // As a placeholder for the UI, let's estimate $5 donated per round played
-    const totalDonated = roundsPlayed * 5; 
+    const roundsPlayed = scores?.length || 0
+    const totalDonated = (donations || []).reduce((sum, donation) => sum + Number(donation.amount || 0), 0)
+    const avgScore = roundsPlayed
+      ? Number((scores.reduce((sum, score) => sum + Number(score.stableford_points || 0), 0) / roundsPlayed).toFixed(1))
+      : null
+    const rankIndex = (leaderboard || []).findIndex((entry) => entry.user_id === userId)
+    const rank = rankIndex >= 0 ? rankIndex + 1 : null
 
-    // Send multiple naming conventions just in case your frontend is picky
     res.json({
+      handicap: userProfile?.handicap ?? null,
+      avg_score: avgScore,
+      rank,
       roundsPlayed: roundsPlayed,
       rounds_played: roundsPlayed,
       total_rounds: roundsPlayed,
       totalDonated: totalDonated,
-      total_donated: totalDonated
-    });
+      total_donated: totalDonated,
+    })
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -103,7 +118,8 @@ router.post('/', authenticate, async (req, res) => {
       .single()
 
     if (error) throw error
-    res.status(201).json(data)
+    const handicap = await refreshUserHandicap(req.user.id)
+    res.status(201).json({ ...data, handicap })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
@@ -119,6 +135,7 @@ router.delete('/:id', authenticate, async (req, res) => {
       .eq('user_id', req.user.id)
 
     if (error) throw error
+    await refreshUserHandicap(req.user.id)
     res.json({ message: 'Score deleted' })
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -128,20 +145,54 @@ router.delete('/:id', authenticate, async (req, res) => {
 // GET /api/scores/leaderboard — public leaderboard (top 20 avg scores)
 router.get('/leaderboard', async (_req, res) => {
   try {
-    const { data, error } = await supabase.rpc('get_leaderboard', { limit_count: 20 })
+    const { data: leaderboard, error } = await supabase.rpc('get_leaderboard', { limit_count: 20 })
 
-    // Fallback if RPC doesn't exist yet
     if (error) {
       const { data: fallback } = await supabase
         .from('scores')
-        .select('user_id, stableford_points, users(full_name)')
+        .select('user_id, stableford_points, users(full_name, handicap)')
         .order('stableford_points', { ascending: false })
         .limit(20)
 
-      return res.json(fallback || [])
+      return res.json((fallback || []).map((row, index) => ({
+        user_id: row.user_id,
+        full_name: row.users?.full_name || 'Member',
+        avg_score: Number(row.stableford_points || 0),
+        total_rounds: 1,
+        handicap: row.users?.handicap ?? null,
+        total_donated: 0,
+        rank: index + 1,
+      })))
     }
 
-    res.json(data || [])
+    const userIds = (leaderboard || []).map((row) => row.user_id).filter(Boolean)
+    if (!userIds.length) {
+      return res.json([])
+    }
+
+    const [{ data: users, error: usersError }, { data: donations, error: donationsError }] = await Promise.all([
+      supabase.from('users').select('id, handicap').in('id', userIds),
+      supabase.from('impact_log').select('user_id, amount').in('user_id', userIds),
+    ])
+
+    if (usersError) throw usersError
+    if (donationsError) throw donationsError
+
+    const handicapMap = new Map((users || []).map((user) => [user.id, user.handicap]))
+    const donationMap = new Map()
+
+    for (const row of donations || []) {
+      donationMap.set(row.user_id, (donationMap.get(row.user_id) || 0) + Number(row.amount || 0))
+    }
+
+    res.json(
+      (leaderboard || []).map((row, index) => ({
+        ...row,
+        handicap: handicapMap.get(row.user_id) ?? null,
+        total_donated: donationMap.get(row.user_id) || 0,
+        rank: index + 1,
+      }))
+    )
   } catch (err) {
     res.status(500).json({ error: err.message })
   }

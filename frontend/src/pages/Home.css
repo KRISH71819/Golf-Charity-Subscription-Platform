@@ -156,6 +156,17 @@
 .rank-3 { background: linear-gradient(135deg, #CD7F32, #A0522D); color: #fff; }
 .rank-4, .rank-5 { background: var(--color-cream-dark); color: var(--color-slate); }
 
+.home-donation-cell {
+  color: var(--color-copper-dark);
+  font-weight: 700;
+}
+
+.home-leaderboard-link {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+}
+
 /* Pricing */
 .pricing-grid {
   margin-top: var(--space-10);

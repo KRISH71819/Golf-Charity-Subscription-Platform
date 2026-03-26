@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -20,7 +22,7 @@ export function AuthProvider({ children }) {
   const navigate = useNavigate()
 
   const isAuthenticated = !!user
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = Boolean(user?.is_admin) || user?.role === 'admin'
 
   // Persist user to localStorage
   useEffect(() => {
@@ -31,37 +33,40 @@ export function AuthProvider({ children }) {
     }
   }, [user])
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (email, password, options = {}) => {
     setLoading(true)
     try {
       const { data } = await api.post('/auth/login', { email, password })
       localStorage.setItem(TOKEN_KEY, data.token)
       setUser(data.user)
-      navigate('/dashboard')
+      const redirectTo = data.user?.is_admin
+        ? '/admin/analytics'
+        : (options.redirectTo || '/dashboard')
+      navigate(redirectTo, { replace: true })
       return data
     } finally {
       setLoading(false)
     }
   }, [navigate])
 
-  const register = useCallback(async (formData) => {
+  const register = useCallback(async (formData, options = {}) => {
     setLoading(true)
     try {
       const { data } = await api.post('/auth/register', formData)
       localStorage.setItem(TOKEN_KEY, data.token)
       setUser(data.user)
-      navigate('/dashboard')
+      navigate(options.redirectTo || '/dashboard', { replace: true })
       return data
     } finally {
       setLoading(false)
     }
   }, [navigate])
 
-  const logout = useCallback(() => {
+  const logout = useCallback((redirectTo = '/') => {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
     setUser(null)
-    navigate('/')
+    navigate(redirectTo, { replace: true })
   }, [navigate])
 
   const refreshUser = useCallback(async () => {

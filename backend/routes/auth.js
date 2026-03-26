@@ -5,7 +5,6 @@ import { signToken } from '../middleware/auth.js'
 
 const router = Router()
 
-// POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
     const { email, password, full_name, handicap } = req.body
@@ -13,11 +12,12 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' })
     }
 
-    // Check existing user
+    const normalizedEmail = String(email).trim().toLowerCase()
+
     const { data: existing } = await supabase
       .from('users')
       .select('id')
-      .eq('email', email)
+      .eq('email', normalizedEmail)
       .single()
 
     if (existing) {
@@ -29,11 +29,12 @@ router.post('/register', async (req, res) => {
     const { data: user, error } = await supabase
       .from('users')
       .insert({
-        email,
+        email: normalizedEmail,
         password_hash: passwordHash,
         full_name: full_name || '',
         handicap: handicap || null,
         role: 'subscriber',
+        is_admin: false,
       })
       .select()
       .single()
@@ -43,14 +44,21 @@ router.post('/register', async (req, res) => {
     const token = signToken(user)
     res.status(201).json({
       token,
-      user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        is_admin: Boolean(user.is_admin),
+        subscription_status: user.subscription_status,
+        subscription_tier: user.subscription_tier,
+      },
     })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
 })
 
-// POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
@@ -58,10 +66,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' })
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase()
+
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email)
+      .eq('email', normalizedEmail)
       .single()
 
     if (error || !user) {
@@ -76,19 +86,23 @@ router.post('/login', async (req, res) => {
     const token = signToken(user)
     res.json({
       token,
-      user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        is_admin: Boolean(user.is_admin),
+        subscription_status: user.subscription_status,
+        subscription_tier: user.subscription_tier,
+      },
     })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
 })
 
-// POST /api/auth/forgot-password
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', async (_req, res) => {
   try {
-    const { email } = req.body
-    // In production, send a reset email with a one-time token
-    // For now, acknowledge the request
     res.json({ message: 'If that email exists, a reset link has been sent.' })
   } catch (err) {
     res.status(500).json({ error: err.message })

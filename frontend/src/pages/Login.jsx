@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const { login, loading } = useAuth()
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -13,15 +12,9 @@ export default function Login() {
     e.preventDefault()
     setError('')
     try {
-      await login(email, password)
-      
-      // Look for a redirect parameter in the URL if they came from a payment button
       const searchParams = new URLSearchParams(window.location.search)
       const redirectParam = searchParams.get('redirect')
-      
-      if (redirectParam) {
-        navigate(redirectParam)
-      }
+      await login(email, password, { redirectTo: redirectParam || undefined })
     } catch (err) {
       // Ensure the error message specifically mentions login failure
       const errorMessage = err.response?.data?.error || "Invalid email or password. Please try again."

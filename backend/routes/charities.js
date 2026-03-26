@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
       .from('charities')
       .select('*')
       .eq('active', true)
-      .order('name')
+      .order('created_at', { ascending: true })
 
     if (category) query = query.eq('category', category)
     if (search) query = query.ilike('name', `%${search}%`)
@@ -32,6 +32,7 @@ router.get('/:id', async (req, res) => {
       .from('charities')
       .select('*')
       .eq('id', req.params.id)
+      .eq('active', true)
       .single()
 
     if (error || !data) return res.status(404).json({ error: 'Charity not found' })

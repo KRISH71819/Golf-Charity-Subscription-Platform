@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import HowItWorks from './pages/HowItWorks'
@@ -12,12 +12,13 @@ import ScoreEntry from './pages/ScoreEntry'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import WinnerVerification from './pages/WinnerVerification'
-import AdminConsole from './pages/AdminConsole'
 import Subscription from './pages/Subscription';
+import AdminApp from './admin/AdminApp'
 
 function App() {
   return (
     <Routes>
+      <Route path="/admin/*" element={<AdminApp />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
@@ -31,8 +32,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/verify" element={<WinnerVerification />} />
-        <Route path="/admin" element={<AdminConsole />} />
         <Route path="/subscription" element={<Subscription />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   )

@@ -27,6 +27,13 @@
   justify-content: center;
   font-size: 2.5rem;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.charity-hero-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
 }
 
 .charity-hero-mission {
@@ -138,6 +145,33 @@
   color: var(--color-slate);
 }
 
+.charity-loading-page {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.charity-website {
+  max-width: 160px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.charity-media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.charity-media-tile {
+  min-height: 140px;
+  border-radius: var(--radius-md);
+  background-size: cover;
+  background-position: center;
+}
+
 @media (max-width: 768px) {
   .charity-profile-grid {
     grid-template-columns: 1fr;
@@ -145,5 +179,9 @@
 
   .charity-hero-content {
     flex-direction: column;
+  }
+
+  .charity-media-grid {
+    grid-template-columns: 1fr;
   }
 }

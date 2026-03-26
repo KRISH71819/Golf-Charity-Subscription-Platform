@@ -129,6 +129,52 @@
   text-align: center;
 }
 
+.dashboard-impact-copy {
+  padding: var(--space-4);
+  color: var(--color-slate);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dashboard-impact-copy p {
+  margin: 0;
+}
+
+.win-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.win-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-cream-dark);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.win-item p,
+.win-item strong,
+.win-item small,
+.win-item span {
+  margin: 0;
+}
+
+.win-item p,
+.win-item small {
+  color: var(--color-slate);
+}
+
+.win-item-meta {
+  text-align: right;
+  display: grid;
+  gap: 2px;
+  font-weight: 700;
+  color: var(--color-copper-dark);
+}
+
 @media (max-width: 768px) {
   .dash-stats {
     grid-template-columns: repeat(2, 1fr);

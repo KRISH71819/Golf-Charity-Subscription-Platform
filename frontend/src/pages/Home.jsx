@@ -1,34 +1,60 @@
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import api from '../services/api'
 import './Home.css'
 
-export default function Home() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+const fallbackLeaders = [
+  { rank: 1, full_name: 'Emily Watson', handicap: 3.8, total_rounds: 3, avg_score: 41.0, total_donated: 1350 },
+  { rank: 2, full_name: 'Sarah Mitchell', handicap: 4.2, total_rounds: 3, avg_score: 38.7, total_donated: 1240 },
+  { rank: 3, full_name: 'Maria Rodriguez', handicap: 6.5, total_rounds: 3, avg_score: 38.0, total_donated: 1120 },
+  { rank: 4, full_name: 'Michael Brown', handicap: 5.6, total_rounds: 3, avg_score: 38.0, total_donated: 1050 },
+  { rank: 5, full_name: 'James Chen', handicap: 8.1, total_rounds: 3, avg_score: 35.0, total_donated: 980 },
+]
 
-  // UPDATED: Now accepts a specific tier (defaults to eagle if none is provided)
+export default function Home() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const [leaders, setLeaders] = useState(fallbackLeaders)
+
   const handleSubscriptionClick = (e, tierId = 'eagle') => {
-    e.preventDefault();
-    
-    // Create the exact URL we want to send them to
-    const checkoutUrl = `/subscription?tier=${tierId}&billing=monthly`;
+    e.preventDefault()
+    const checkoutUrl = `/subscription?tier=${tierId}&billing=monthly`
 
     if (user) {
-      navigate(checkoutUrl); 
+      navigate(checkoutUrl)
     } else {
-      // Send them to signup, but remember exactly which plan they clicked!
-      navigate(`/signup?redirect=${encodeURIComponent(checkoutUrl)}`);
+      navigate(`/signup?redirect=${encodeURIComponent(checkoutUrl)}`)
     }
-  };
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadLeaders() {
+      try {
+        const { data } = await api.get('/scores/leaderboard')
+        if (!cancelled && Array.isArray(data) && data.length) {
+          setLeaders(data.slice(0, 5))
+        }
+      } catch {
+        // Keep fallback preview if the API is unavailable.
+      }
+    }
+
+    loadLeaders()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <div className="home-page">
-      {/* ===== HERO ===== */}
       <section className="hero" id="hero-section">
         <div className="hero-bg"></div>
         <div className="container hero-content">
           <div className="hero-badge animate-fade-in">
-            <span className="badge badge-copper">Season 2026 — Now Open</span>
+            <span className="badge badge-copper">Season 2026 - Now Open</span>
           </div>
           <h1 className="hero-title animate-fade-in-up">
             Every Round<br />
@@ -36,10 +62,9 @@ export default function Home() {
           </h1>
           <p className="hero-subtitle animate-fade-in-up delay-1">
             Subscribe. Play your favourite courses. Post your scores.
-            Win exclusive prizes — while raising funds for charities you love.
+            Win exclusive prizes while raising funds for charities you love.
           </p>
           <div className="hero-cta animate-fade-in-up delay-2">
-            {/* Defaults to Eagle */}
             <button onClick={(e) => handleSubscriptionClick(e, 'eagle')} className="btn btn-copper btn-lg">
               Start Your Subscription
             </button>
@@ -66,7 +91,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== HOW IT WORKS PREVIEW ===== */}
       <section className="section how-preview" id="how-it-works-preview">
         <div className="container text-center">
           <span className="badge badge-forest">Simple & Rewarding</span>
@@ -96,7 +120,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== FEATURED CHARITIES ===== */}
       <section className="section featured-charities" id="featured-charities">
         <div className="container">
           <div className="flex justify-between items-center" style={{ marginBottom: 'var(--space-8)' }}>
@@ -126,7 +149,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== LEADERBOARD PREVIEW ===== */}
       <section className="section leaderboard-preview" id="leaderboard-preview">
         <div className="container">
           <div className="text-center" style={{ marginBottom: 'var(--space-8)' }}>
@@ -134,42 +156,40 @@ export default function Home() {
             <h2 style={{ marginTop: 'var(--space-3)' }}>Current Leaderboard</h2>
           </div>
 
-          <div className="card-solid" style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div className="card-solid" style={{ maxWidth: '900px', margin: '0 auto' }}>
             <div className="table-wrapper">
               <table>
                 <thead>
                   <tr>
                     <th>Rank</th>
                     <th>Golfer</th>
+                    <th>HCP</th>
                     <th>Rounds</th>
                     <th>Avg Score</th>
-                    <th>Charity</th>
+                    <th>Donated</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    { rank: 1, name: 'Sarah Mitchell', rounds: 24, avg: 72, charity: 'First Tee' },
-                    { rank: 2, name: 'James Chen', rounds: 22, avg: 73, charity: 'Folds of Honor' },
-                    { rank: 3, name: 'Maria Rodriguez', rounds: 21, avg: 74, charity: 'PGA REACH' },
-                    { rank: 4, name: 'David Park', rounds: 20, avg: 75, charity: 'First Tee' },
-                    { rank: 5, name: 'Emily Watson', rounds: 19, avg: 76, charity: 'Folds of Honor' },
-                  ].map(player => (
-                    <tr key={player.rank}>
-                      <td><span className={`rank-badge rank-${player.rank}`}>{player.rank}</span></td>
-                      <td><strong>{player.name}</strong></td>
-                      <td>{player.rounds}</td>
-                      <td>{player.avg}</td>
-                      <td><span className="badge badge-forest">{player.charity}</span></td>
+                  {leaders.map((player, index) => (
+                    <tr key={player.user_id || player.full_name}>
+                      <td><span className={`rank-badge rank-${index + 1}`}>{index + 1}</span></td>
+                      <td><strong>{player.full_name}</strong></td>
+                      <td>{player.handicap ?? '—'}</td>
+                      <td>{player.total_rounds ?? 0}</td>
+                      <td>{player.avg_score ?? '—'}</td>
+                      <td className="home-donation-cell">${Number(player.total_donated || 0).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+            <div className="home-leaderboard-link">
+              <Link to="/leaderboard" className="btn btn-secondary">View Full Leaderboard</Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ===== PRICING ===== */}
       <section className="section pricing" id="pricing-section">
         <div className="container text-center">
           <span className="badge badge-copper">Choose Your Plan</span>
@@ -181,31 +201,31 @@ export default function Home() {
           <div className="grid grid-3 pricing-grid">
             {[
               {
-                id: 'birdie', // ADDED ID
+                id: 'birdie',
                 name: 'Birdie',
                 price: '$9.99',
                 period: '/month',
                 features: ['Score tracking', 'Choose 1 charity', 'Monthly leaderboard', 'Basic profile'],
                 cta: 'Start Free Trial',
-                popular: false
+                popular: false,
               },
               {
-                id: 'eagle', // ADDED ID
+                id: 'eagle',
                 name: 'Eagle',
                 price: '$24.99',
                 period: '/month',
                 features: ['All Birdie features', 'Choose 3 charities', 'Priority verification', 'Exclusive events access', 'Premium profile badge'],
                 cta: 'Most Popular',
-                popular: true
+                popular: true,
               },
               {
-                id: 'albatross', // ADDED ID
+                id: 'albatross',
                 name: 'Albatross',
                 price: '$49.99',
                 period: '/month',
                 features: ['All Eagle features', 'Unlimited charities', 'VIP concierge', 'Personal coach match', 'Annual gala invitation', 'Tax receipt dashboard'],
                 cta: 'Go Premium',
-                popular: false
+                popular: false,
               },
             ].map((plan, i) => (
               <div className={`card pricing-card ${plan.popular ? 'pricing-card-popular' : ''} animate-fade-in-up delay-${i + 1}`} key={plan.name}>
@@ -216,11 +236,10 @@ export default function Home() {
                   <span className="price-period">{plan.period}</span>
                 </div>
                 <ul className="plan-features">
-                  {plan.features.map(f => (
-                    <li key={f}>✓ {f}</li>
+                  {plan.features.map((feature) => (
+                    <li key={feature}>✓ {feature}</li>
                   ))}
                 </ul>
-                {/* UPDATED: Passes the specific plan ID into the click handler */}
                 <button onClick={(e) => handleSubscriptionClick(e, plan.id)} className={`btn ${plan.popular ? 'btn-copper' : 'btn-primary'} btn-lg`} style={{ width: '100%', marginTop: 'auto' }}>
                   {plan.cta}
                 </button>
@@ -230,7 +249,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== CTA ===== */}
       <section className="section-lg cta-section" id="cta-section">
         <div className="container text-center">
           <div className="cta-card">
@@ -238,9 +256,8 @@ export default function Home() {
             <p style={{ color: 'var(--color-mist)', maxWidth: '500px', margin: 'var(--space-4) auto 0' }}>
               Join thousands of golfers who play with purpose. Start your free trial today.
             </p>
-            {/* Defaults to Eagle */}
             <button onClick={(e) => handleSubscriptionClick(e, 'eagle')} className="btn btn-copper btn-lg" style={{ marginTop: 'var(--space-6)' }}>
-              Subscribe Now — It&apos;s Free to Try
+              Subscribe Now - It&apos;s Free to Try
             </button>
           </div>
         </div>
