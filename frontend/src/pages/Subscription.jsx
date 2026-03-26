@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom'; // <-- ADDED THIS
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -6,6 +7,9 @@ export default function Subscription() {
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // 1. Let React Router reliably grab the URL parameters
+  const [searchParams] = useSearchParams();
 
   // Automatically fetch the checkout session when the page loads
   useEffect(() => {
@@ -13,39 +17,39 @@ export default function Subscription() {
     if (!authLoading && user) {
       handleCheckout();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading]);
 
-    const handleCheckout = async () => {
+  const handleCheckout = async () => {
     setLoading(true);
     setError('');
     
     try {
-      // 1. Read the URL to see exactly what the user clicked on the Pricing page
-      const searchParams = new URLSearchParams(window.location.search);
+      // 2. Read the parameters from the React Router hook instead of window.location
       const urlTier = searchParams.get('tier');
       const urlBilling = searchParams.get('billing');
 
-      // 2. Default to their profile tier if no URL param exists
+      // 3. Default to their profile tier if no URL param exists
       const tierId = urlTier || user?.subscription_tier || 'eagle';
       const billingCycle = urlBilling || 'monthly';
       
       let priceId = '';
 
-      // 3. Match the exact Stripe Price ID based on Monthly vs Annual
+      // 4. Match the exact Stripe Price ID based on Monthly vs Annual
       if (billingCycle === 'monthly') {
         if (tierId === 'birdie') priceId = 'price_1TF9Y04JuqdjL3dVQ9fzUhUk';
         if (tierId === 'eagle') priceId = 'price_1TF9Yj4JuqdjL3dViz9myT83';
         if (tierId === 'albatross') priceId = 'price_1TF9Z14JuqdjL3dVkqhyHt8A';
       } else {
-        // ANNUAL PLANS - YOU MUST CREATE THESE IN STRIPE AND PASTE THE IDs HERE!
+        // ANNUAL PLANS
         if (tierId === 'birdie') priceId = 'price_1TFA8N4JuqdjL3dV2JLsB5yx';
         if (tierId === 'eagle') priceId = 'price_1TFA8h4JuqdjL3dVZPcOweHm';
         if (tierId === 'albatross') priceId = 'price_1TFA8z4JuqdjL3dVql4JuUAo';
       }
 
-      // Safety check to make sure you updated the Annual IDs
-      if (!priceId || priceId.includes('YOUR_ANNUAL')) {
-        throw new Error(`You need to paste your Annual Stripe Price IDs into Subscription.jsx for the ${tierId} plan!`);
+      // Safety check
+      if (!priceId) {
+        throw new Error(`We could not find a Stripe Price ID for the ${tierId} plan.`);
       }
 
       // Call your backend route to create the Stripe Checkout Session
@@ -84,7 +88,7 @@ export default function Subscription() {
         ) : (
           <>
             <p style={{ margin: 'var(--space-4) 0', color: 'var(--color-slate)' }}>
-              We are securely transferring you to Stripe to complete your {user?.subscription_tier || 'premium'} membership.
+              We are securely transferring you to Stripe to complete your {searchParams.get('tier') || user?.subscription_tier || 'premium'} membership.
             </p>
             <div style={{ margin: 'var(--space-6) auto', width: '40px', height: '40px', border: '4px solid var(--color-copper)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
             <p className="text-sm">Please do not refresh the page...</p>

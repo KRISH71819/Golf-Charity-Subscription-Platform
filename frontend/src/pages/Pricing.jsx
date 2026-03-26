@@ -130,7 +130,6 @@ export default function Pricing() {
                   ))}
                 </ul>
 
-                {/* UPDATED: Passes the plan ID into the click handler */}
                 <button
                   onClick={(e) => handlePlanClick(e, plan.id)}
                   className={`btn btn-lg ${plan.popular ? 'btn-copper' : 'btn-secondary'}`}
@@ -144,7 +143,6 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Trust bar */}
       <section className="section text-center">
         <div className="container">
           <div className="trust-bar">
@@ -165,4 +163,4 @@ export default function Pricing() {
       </section>
     </div>
   )
-}
+} 
