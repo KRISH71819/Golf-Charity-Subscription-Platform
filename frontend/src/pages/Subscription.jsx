@@ -37,7 +37,7 @@ export default function Subscription() {
 
       // 4. Match the exact Stripe Price ID based on Monthly vs Annual
       if (billingCycle === 'monthly') {
-        if (tierId === 'birdie') priceId = 'price_1TF9Y04JuqdjL3dVQ9fzUhUk';
+        if (tierId === 'birdie') priceId = 'price_1TF9YO4JuqdjL3dVQ9fzUhUk';
         if (tierId === 'eagle') priceId = 'price_1TF9Yj4JuqdjL3dViz9myT83';
         if (tierId === 'albatross') priceId = 'price_1TF9Z14JuqdjL3dVkqhyHt8A';
       } else {

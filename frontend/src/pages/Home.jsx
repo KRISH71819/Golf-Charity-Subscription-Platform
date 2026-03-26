@@ -1,20 +1,23 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext' // Imports your auth state
+import { useAuth } from '../context/AuthContext'
 import './Home.css'
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Grabs the current logged-in user
+  const { user } = useAuth();
 
-  // The smart click handler for all subscription buttons
-  const handleSubscriptionClick = (e) => {
+  // UPDATED: Now accepts a specific tier (defaults to eagle if none is provided)
+  const handleSubscriptionClick = (e, tierId = 'eagle') => {
     e.preventDefault();
+    
+    // Create the exact URL we want to send them to
+    const checkoutUrl = `/subscription?tier=${tierId}&billing=monthly`;
+
     if (user) {
-      // If they are already logged in, skip signup and go to the payment/plan page
-      navigate('/subscription'); 
+      navigate(checkoutUrl); 
     } else {
-      // If not logged in, send to signup, but remember they want to subscribe
-      navigate('/signup?redirect=/subscription');
+      // Send them to signup, but remember exactly which plan they clicked!
+      navigate(`/signup?redirect=${encodeURIComponent(checkoutUrl)}`);
     }
   };
 
@@ -36,8 +39,8 @@ export default function Home() {
             Win exclusive prizes — while raising funds for charities you love.
           </p>
           <div className="hero-cta animate-fade-in-up delay-2">
-            {/* UPDATED BUTTON */}
-            <button onClick={handleSubscriptionClick} className="btn btn-copper btn-lg">
+            {/* Defaults to Eagle */}
+            <button onClick={(e) => handleSubscriptionClick(e, 'eagle')} className="btn btn-copper btn-lg">
               Start Your Subscription
             </button>
             <Link to="/how-it-works" className="btn btn-secondary btn-lg" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)', marginLeft: '1rem' }}>
@@ -178,6 +181,7 @@ export default function Home() {
           <div className="grid grid-3 pricing-grid">
             {[
               {
+                id: 'birdie', // ADDED ID
                 name: 'Birdie',
                 price: '$9.99',
                 period: '/month',
@@ -186,6 +190,7 @@ export default function Home() {
                 popular: false
               },
               {
+                id: 'eagle', // ADDED ID
                 name: 'Eagle',
                 price: '$24.99',
                 period: '/month',
@@ -194,6 +199,7 @@ export default function Home() {
                 popular: true
               },
               {
+                id: 'albatross', // ADDED ID
                 name: 'Albatross',
                 price: '$49.99',
                 period: '/month',
@@ -214,8 +220,8 @@ export default function Home() {
                     <li key={f}>✓ {f}</li>
                   ))}
                 </ul>
-                {/* UPDATED BUTTON */}
-                <button onClick={handleSubscriptionClick} className={`btn ${plan.popular ? 'btn-copper' : 'btn-primary'} btn-lg`} style={{ width: '100%', marginTop: 'auto' }}>
+                {/* UPDATED: Passes the specific plan ID into the click handler */}
+                <button onClick={(e) => handleSubscriptionClick(e, plan.id)} className={`btn ${plan.popular ? 'btn-copper' : 'btn-primary'} btn-lg`} style={{ width: '100%', marginTop: 'auto' }}>
                   {plan.cta}
                 </button>
               </div>
@@ -232,8 +238,8 @@ export default function Home() {
             <p style={{ color: 'var(--color-mist)', maxWidth: '500px', margin: 'var(--space-4) auto 0' }}>
               Join thousands of golfers who play with purpose. Start your free trial today.
             </p>
-            {/* UPDATED BUTTON */}
-            <button onClick={handleSubscriptionClick} className="btn btn-copper btn-lg" style={{ marginTop: 'var(--space-6)' }}>
+            {/* Defaults to Eagle */}
+            <button onClick={(e) => handleSubscriptionClick(e, 'eagle')} className="btn btn-copper btn-lg" style={{ marginTop: 'var(--space-6)' }}>
               Subscribe Now — It&apos;s Free to Try
             </button>
           </div>
